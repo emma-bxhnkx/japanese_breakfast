@@ -1,4 +1,5 @@
 <html>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
   <head>
     <!-- /////////////////////////////////////////////////////
     This is an example of appending contents from a Google Doc
@@ -13,9 +14,11 @@
        * It is used to authenticate a call to personal data.
         * In the event the sheet becomes public, we can set an API key, which would make security more easy.
        */
-      var CLIENT_ID = 'winkwink';
+      var CLIENT_ID = '557692097194-b5phtdvggdv93th4jumq51578cln5tbl.apps.googleusercontent.com';
 
       var SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
+
+      var SECTIONS = ['tour','merch']
 
       /**
        * Check if current user has authorized this application.
@@ -67,6 +70,176 @@
             'https://sheets.googleapis.com/$discovery/rest?version=v4';
         gapi.client.load(discoveryUrl).then(generateTable);
       }
+
+      // genrealized get info...
+      function readSheet(cell_range, table_id) {
+        gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1mQ5bQ9jHZ8hAKC9XKCSACQGxchnwQLhff_CDfxzAeEs',
+            range: cell_range
+          }).then(function(response) {
+
+            var range = response.result;
+            var ticket_col = -1
+            
+            if (range.values.length > 0) {
+
+              var table = document.createElement('table');
+              table.id = table_id
+
+              // per row
+              for (j = 0; j < range.values.length; j++) {
+                
+                var row = range.values[j];
+                var tr = document.createElement('tr');   
+                
+                // per col
+                for (k=0; k< row.length; k++) {
+                  
+                  var contents = row[k]
+                  
+                  if (contents == 'Buy Link') {
+                    var ticket_col = k
+                    var text = document.createTextNode(contents);
+
+                  }
+
+                  else if (k == ticket_col && i!=0) {
+                    console.log("hit")
+                    // contents  = '<a href="' + contents  + '">Ticket</a>'
+                    var linkText = document.createTextNode("Tickets");
+                    var text = document.createElement('a')
+                    text.appendChild(linkText);
+                    text.href = contents
+                    text.title = "Tickets"
+                  }
+
+                  else {
+                    var text = document.createTextNode(contents);
+                  }
+                  
+                  var td = document.createElement('td');
+
+                  td.appendChild(text);
+                  tr.appendChild(td);
+
+                }
+
+                table.appendChild(tr);
+
+              }
+
+              document.body.appendChild(table);
+              var currentDiv = document.getElementById(table_id); 
+              document.body.insertBefore(table, currentDiv); 
+
+            } else {
+              appendPre('No data found.');
+            }
+
+          }, function(response) {
+            appendPre('Error: ' + response.result.error.message);
+          })
+      }
+
+      // get stuff from the api
+      function requestAPI(sheet_tab, cell_range) {
+         var copy_range = sheet_tab + '!' + cell_range
+
+         gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1mQ5bQ9jHZ8hAKC9XKCSACQGxchnwQLhff_CDfxzAeEs',
+            range: copy_range
+          }).then( function(response) {
+            
+            var range = response.result;
+
+            if (range.values.length > 0) {
+
+              console.log("shitty balls")            
+            } else {
+              console.log('No data found.');
+            }
+
+          }, function(response) {
+            console.log('Error: ' + response.result.error.message);
+          })
+
+          return range
+
+      }
+
+      ///
+      function getTour() {
+        var table_id = 'tour'
+
+        cell_range = table_id + '!' + 'A1:D'
+
+        gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1mQ5bQ9jHZ8hAKC9XKCSACQGxchnwQLhff_CDfxzAeEs',
+            range: cell_range
+          }).then(function(response) {
+
+            var range = response.result;
+            var ticket_col = -1
+            
+            if (range.values.length > 0) {
+              var table = document.createElement('table');
+              table.id = table_id
+
+              // per row
+              for (j = 0; j < range.values.length; j++) {
+                
+                var row = range.values[j];
+                var tr = document.createElement('tr');   
+                
+                // per col
+                for (k=0; k< row.length; k++) {
+                  
+                  var contents = row[k]
+                  
+                  if (contents == 'Buy Link') {
+                    var ticket_col = k
+                    var text = document.createTextNode(contents);
+
+                  }
+
+                  else if (k == ticket_col && j!=0) {
+                    console.log("hit")
+                    // contents  = '<a href="' + contents  + '">Ticket</a>'
+                    var linkText = document.createTextNode("Tickets");
+                    var text = document.createElement('a')
+                    text.appendChild(linkText);
+                    text.href = contents
+                    text.title = "Tickets"
+                  }
+
+                  else {
+                    var text = document.createTextNode(contents);
+                  }
+                  
+                  var td = document.createElement('td');
+
+                  td.appendChild(text);
+                  tr.appendChild(td);
+
+                }
+
+                table.appendChild(tr);
+
+              }
+
+              document.body.appendChild(table);
+              var currentDiv = document.getElementById(table_id); 
+              document.body.insertBefore(table, currentDiv); 
+            } else {
+              console.log('No data found.');
+            }
+
+          }, function(response) {
+            console.log('Error: ' + response.result.error.message);
+          })
+
+
+      }
       
       /**
        * This is the main function that populates the tables.
@@ -76,94 +249,15 @@
        * and also needs to populate each column in each row in an automated fashion. 
        */
       function generateTable() {
-        var table_id1 = 'tour'
-        gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: '1mQ5bQ9jHZ8hAKC9XKCSACQGxchnwQLhff_CDfxzAeEs',
-          range: 'tour!A1:D',
-        }).then(function(response) {
-
-          var range = response.result;
-          
-          if (range.values.length > 0) {
-            var table = document.createElement('table');
-            table.id = table_id1
-
-            for (i = 0; i < range.values.length; i++) {
-              var row = range.values[i];
-
-              var tr = document.createElement('tr');   
-              var td1 = document.createElement('td');
-              var td2 = document.createElement('td');
-
-              var text1 = document.createTextNode(row[0]);
-              var text2 = document.createTextNode(row[1]);
-
-              td1.appendChild(text1);
-              td2.appendChild(text2);
-              tr.appendChild(td1);
-              tr.appendChild(td2);
-
-              table.appendChild(tr);
-
-            }
-
-            document.body.appendChild(table);
-            var currentDiv = document.getElementById(table_id1); 
-            document.body.insertBefore(table, currentDiv); 
-
-          } else {
-            appendPre('No data found.');
-          }
-
-        }, function(response) {
-          appendPre('Error: ' + response.result.error.message);
-        });
-        
-        // another manual section for merch
-        var table_id2 = 'merch'
-        gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: '1mQ5bQ9jHZ8hAKC9XKCSACQGxchnwQLhff_CDfxzAeEs',
-          range: 'merch!A1:D',
-        }).then(function(response) {
-
-          var range = response.result;
-
-          if (range.values.length > 0) {
-
-            var table = document.createElement('table');
-            table.id = table_id2
-
-            for (i = 0; i < range.values.length; i++) {
-              var row = range.values[i];
-
-              var tr = document.createElement('tr');   
-              var td1 = document.createElement('td');
-              var td2 = document.createElement('td');
-
-              var text1 = document.createTextNode(row[0]);
-              var text2 = document.createTextNode(row[1]);
-
-              td1.appendChild(text1);
-              td2.appendChild(text2);
-              tr.appendChild(td1);
-              tr.appendChild(td2);
-
-              table.appendChild(tr);
-
-            }
-
-            document.body.appendChild(table);
-            var currentDiv = document.getElementById(table_id2); 
-            document.body.insertBefore(table, currentDiv); 
-
-          } else {
-            appendPre('No data found.');
-          }
-
-        }, function(response) {
-          appendPre('Error: ' + response.result.error.message);
-        });
-      
+        getTour()
+        // getMerch()
+        // for (i=0; i < SECTIONS.length; i++) {
+        //   var table_id = SECTIONS[i];
+        //   var cell_range = SECTIONS[i] + '!A1:D';
+        //   requestAPI(cell_range)
+        //   // readSheet(cell_range,table_id)
+        // }
+  
       }
 
     </script>
@@ -184,6 +278,8 @@
     <header> Tour Dates </header>
     <!-- generateTable() appends rows from the Google Sheet's tour-tab. -->
     <table id='tour'></table>
+
+    <hr>
 
     <header> Products </header>
     <!-- generateTable() appends rows from the Google Sheet's merch-tab here. -->
